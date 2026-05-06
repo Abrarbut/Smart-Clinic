@@ -1,0 +1,495 @@
+openapi: 3.1.0
+info:
+  title: Api
+  version: 0.1.0
+  description: Smart Clinic API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: auth
+    description: Authentication operations
+  - name: doctors
+    description: Doctor operations
+  - name: appointments
+    description: Appointment operations
+  - name: medical-history
+    description: Medical history operations
+  - name: dashboard
+    description: Dashboard summary operations
+  - name: specialties
+    description: Specialty operations
+paths:
+  /auth/register:
+    post:
+      operationId: register
+      tags: [auth]
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterBody"
+      responses:
+        "201":
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthUser"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Email already registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Log in
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginBody"
+      responses:
+        "200":
+          description: Logged in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthUser"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Log out
+      responses:
+        "204":
+          description: Logged out
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get current user
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthUser"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /specialties:
+    get:
+      operationId: listSpecialties
+      tags: [specialties]
+      summary: List available specialties
+      responses:
+        "200":
+          description: List of specialties
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+
+  /doctors:
+    get:
+      operationId: listDoctors
+      tags: [doctors]
+      summary: List all doctors
+      parameters:
+        - name: specialty
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of doctors
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Doctor"
+
+  /doctors/{id}:
+    get:
+      operationId: getDoctor
+      tags: [doctors]
+      summary: Get a doctor by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Doctor details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Doctor"
+        "404":
+          description: Not found
+
+  /appointments:
+    get:
+      operationId: listAppointments
+      tags: [appointments]
+      summary: List appointments
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [upcoming, completed, cancelled]
+      responses:
+        "200":
+          description: List of appointments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Appointment"
+    post:
+      operationId: createAppointment
+      tags: [appointments]
+      summary: Book an appointment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAppointmentBody"
+      responses:
+        "201":
+          description: Appointment booked
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Appointment"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /appointments/{id}:
+    get:
+      operationId: getAppointment
+      tags: [appointments]
+      summary: Get appointment by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Appointment details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Appointment"
+        "404":
+          description: Not found
+
+  /appointments/{id}/cancel:
+    patch:
+      operationId: cancelAppointment
+      tags: [appointments]
+      summary: Cancel an appointment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Cancelled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Appointment"
+        "404":
+          description: Not found
+
+  /medical-history:
+    get:
+      operationId: listMedicalHistory
+      tags: [medical-history]
+      summary: List medical history records
+      responses:
+        "200":
+          description: List of medical history records
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MedicalHistory"
+
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Get dashboard summary stats
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+
+    Doctor:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        specialty:
+          type: string
+        qualification:
+          type: string
+        experience:
+          type: integer
+          description: Years of experience
+        fee:
+          type: integer
+          description: Consultation fee in PKR
+        availableTimes:
+          type: array
+          items:
+            type: string
+        rating:
+          type: number
+          format: float
+        totalPatients:
+          type: integer
+      required:
+        - id
+        - name
+        - specialty
+        - qualification
+        - experience
+        - fee
+        - availableTimes
+        - rating
+        - totalPatients
+
+    Appointment:
+      type: object
+      properties:
+        id:
+          type: integer
+        doctorId:
+          type: integer
+        doctorName:
+          type: string
+        specialty:
+          type: string
+        date:
+          type: string
+          format: date
+        time:
+          type: string
+        reason:
+          type: string
+        status:
+          type: string
+          enum: [upcoming, completed, cancelled]
+        fee:
+          type: integer
+      required:
+        - id
+        - doctorId
+        - doctorName
+        - specialty
+        - date
+        - time
+        - status
+        - fee
+
+    CreateAppointmentBody:
+      type: object
+      properties:
+        doctorId:
+          type: integer
+        date:
+          type: string
+          format: date
+        time:
+          type: string
+        reason:
+          type: string
+      required:
+        - doctorId
+        - date
+        - time
+
+    MedicalHistory:
+      type: object
+      properties:
+        id:
+          type: integer
+        doctorName:
+          type: string
+        specialty:
+          type: string
+        date:
+          type: string
+          format: date
+        diagnosis:
+          type: string
+        prescription:
+          type: string
+        notes:
+          type: string
+      required:
+        - id
+        - doctorName
+        - specialty
+        - date
+        - diagnosis
+
+    DashboardSummary:
+      type: object
+      properties:
+        totalAppointments:
+          type: integer
+        upcomingAppointments:
+          type: integer
+        completedAppointments:
+          type: integer
+        cancelledAppointments:
+          type: integer
+        totalSpent:
+          type: integer
+        nextAppointment:
+          $ref: "#/components/schemas/Appointment"
+      required:
+        - totalAppointments
+        - upcomingAppointments
+        - completedAppointments
+        - cancelledAppointments
+        - totalSpent
+
+    AuthUser:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+          enum: [patient, doctor, receptionist, admin]
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - email
+        - role
+        - createdAt
+
+    RegisterBody:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 6
+        role:
+          type: string
+          enum: [patient, doctor, receptionist, admin]
+      required:
+        - name
+        - email
+        - password
+
+    LoginBody:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+      required:
+        - email
+        - password

@@ -1,0 +1,78 @@
+# See https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
+
+# compiled output
+dist
+tmp
+out-tsc
+*.tsbuildinfo
+.expo
+.expo-shared
+
+# dependencies
+node_modules
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Setup & Deployment files (local setup, not needed in repo)
+docker-compose.override.yml
+.env.example
+.env.sample
+Dockerfile.local
+ecosystem.config.js
+ecosystem.config.local.js
+
+# Build & Deploy artifacts
+build/
+dist/
+*.tgz
+*.zip
+
+# Process manager
+.pm2/
+pm2.json
+pm2.yml
+
+# Docker & deployment
+.docker/
+docker-volumes/
+postgres_data/
+
+# IDE - VSCode
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# misc
+/.sass-cache
+/connect.lock
+/coverage
+/libpeerconnection.log
+npm-debug.log
+yarn-error.log
+testem.log
+/typings
+
+# System Files
+.DS_Store
+Thumbs.db
+
+.cursor/rules/nx-rules.mdc
+.github/instructions/nx.instructions.md
+
+# Replit
+.cache/
+.local/

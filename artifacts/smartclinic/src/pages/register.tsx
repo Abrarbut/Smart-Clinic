@@ -22,6 +22,15 @@ const ROLES = [
   { value: "admin", label: "Administrator", description: "Full system access" },
 ];
 
+const INVALID_REPEAT_TLD = /(?:\.com){2,}$|(?:\.net){2,}$|(?:\.org){2,}$|(?:\.edu){2,}$|(?:\.gov){2,}$/i;
+
+const isValidEmail = (value: string) => {
+  if (!value.includes("@")) return false;
+  if (value.includes("..")) return false;
+  if (INVALID_REPEAT_TLD.test(value)) return false;
+  return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(value);
+};
+
 export default function Register() {
   const [, navigate] = useLocation();
   const { register } = useAuth();
@@ -37,6 +46,10 @@ export default function Register() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !email || !password || !role) return;
+    if (!isValidEmail(email)) {
+      toast({ title: "Invalid email", description: "Please enter a valid email address.", variant: "destructive" });
+      return;
+    }
     if (password.length < 6) {
       toast({ title: "Password too short", description: "Password must be at least 6 characters.", variant: "destructive" });
       return;

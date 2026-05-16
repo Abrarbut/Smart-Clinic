@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { db, usersTable, doctorsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { registerBodySchema, loginBodySchema, changePasswordBodySchema } from "@workspace/db";
+import { clearSession, getSessionUserId, setSessionUserId } from "../lib/session";
 
 const router = Router();
 
@@ -37,7 +38,7 @@ router.post("/auth/register", async (req, res) => {
     });
   }
 
-  req.session.userId = user.id;
+  setSessionUserId(res, user.id);
 
   res.status(201).json({
     id: user.id,
@@ -69,7 +70,7 @@ router.post("/auth/login", async (req, res) => {
     return;
   }
 
-  req.session.userId = user.id;
+  setSessionUserId(res, user.id);
 
   res.json({
     id: user.id,
@@ -81,19 +82,18 @@ router.post("/auth/login", async (req, res) => {
 });
 
 router.post("/auth/logout", (req, res) => {
-  req.session.destroy(() => {
-    res.clearCookie("sid");
-    res.status(204).send();
-  });
+  clearSession(res);
+  res.status(204).send();
 });
 
 router.get("/auth/me", async (req, res) => {
-  if (!req.session.userId) {
+  const userId = getSessionUserId(req);
+  if (!userId) {
     res.status(401).json({ error: "Not authenticated" });
     return;
   }
 
-  const [user] = await db.select().from(usersTable).where(eq(usersTable.id, req.session.userId)).limit(1);
+  const [user] = await db.select().from(usersTable).where(eq(usersTable.id, userId)).limit(1);
   if (!user) {
     res.status(401).json({ error: "User not found" });
     return;
@@ -109,7 +109,8 @@ router.get("/auth/me", async (req, res) => {
 });
 
 router.patch("/auth/password", async (req, res) => {
-  if (!req.session.userId) {
+  const userId = getSessionUserId(req);
+  if (!userId) {
     res.status(401).json({ error: "Not authenticated" });
     return;
   }
@@ -120,7 +121,7 @@ router.patch("/auth/password", async (req, res) => {
     return;
   }
 
-  const [user] = await db.select().from(usersTable).where(eq(usersTable.id, req.session.userId)).limit(1);
+  const [user] = await db.select().from(usersTable).where(eq(usersTable.id, userId)).limit(1);
   if (!user) {
     res.status(401).json({ error: "User not found" });
     return;

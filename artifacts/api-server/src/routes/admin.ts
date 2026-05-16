@@ -1,11 +1,12 @@
 import { Router } from "express";
 import { db, usersTable, appointmentsTable, doctorsTable } from "@workspace/db";
 import { eq, count } from "drizzle-orm";
+import { getSessionUserId } from "../lib/session";
 
 const router = Router();
 
 function requireAdmin(req: any, res: any, next: any) {
-  if (!req.session.userId) { res.status(401).json({ error: "Not authenticated" }); return; }
+  if (!getSessionUserId(req)) { res.status(401).json({ error: "Not authenticated" }); return; }
   next();
 }
 

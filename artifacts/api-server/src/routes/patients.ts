@@ -1,11 +1,12 @@
 import { Router, type IRouter } from "express";
 import { eq } from "drizzle-orm";
 import { db, usersTable } from "@workspace/db";
+import { getSessionUserId } from "../lib/session";
 
 const router: IRouter = Router();
 
 router.get("/patients", async (req, res): Promise<void> => {
-  if (!req.session.userId) {
+  if (!getSessionUserId(req)) {
     res.status(401).json({ error: "Not authenticated" });
     return;
   }

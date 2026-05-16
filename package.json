@@ -3,9 +3,6 @@
   "version": "0.0.0",
   "license": "MIT",
   "private": true,
-<<<<<<< HEAD
-  "packageManager": "pnpm@10.33.3",
-=======
   "workspaces": [
     "artifacts/*",
     "lib/*",
@@ -21,7 +18,6 @@
     "typecheck:libs": "tsc --build",
     "typecheck": "npm run typecheck:libs && npm run typecheck --workspaces --if-present"
   },
->>>>>>> 596d5e7619a8166c8551d060a1d9993df138c582
   "devDependencies": {
     "concurrently": "^9.2.0",
     "prettier": "^3.8.1",
